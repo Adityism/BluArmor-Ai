@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BluArmor - AI Assistant</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --background: #131314;
+            --surface-1: #1e1f20;
+            --surface-2: #2a2b2d;
+            --text-primary: #f1f1f2;
+            --text-secondary: #a9a9b0;
+            --accent: #4c87e8;
+            --logo-glow: rgba(76, 135, 232, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            height: 100vh;
+            /* Use svh for better mobile viewport handling */
+            height: 100svh; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Main container now uses Flexbox for proper layout */
+        .container {
+            height: 100%;
+            display: flex;
+            flex-direction: column; /* Key for vertical layout */
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Enhanced Header */
+        .header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0; /* Prevents header from shrinking */
+            z-index: 10;
+            background-color: rgba(19, 19, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .logo-container {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: var(--surface-2);
+            color: var(--text-primary);
+        }
+        
+        .header-btn svg { width: 20px; height: 20px; }
+
+        /* Main content now grows to fill available space */
+        .main-content {
+            flex: 1; /* This makes the content area grow */
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centers the content vertically */
+            align-items: center;
+            padding: 2rem 1.5rem;
+            overflow-y: auto; /* Allows scrolling if content overflows */
+        }
+
+        .welcome-section {
+            max-width: 640px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            text-align: center;
+        }
+        
+        @keyframes pulse-glow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 var(--logo-glow); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(76, 135, 232, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 135, 232, 0); }
+        }
+
+        .main-logo {
+            width: 88px;
+            height: 88px;
+            margin-bottom: 2rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .main-logo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--logo-glow);
+            animation: pulse-glow 4s infinite ease-in-out;
+            z-index: -1;
+        }
+        .main-logo .logo-img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+        
+        /* Wrapper for bottom content */
+        .bottom-content-wrapper {
+            flex-shrink: 0; /* Prevents this section from shrinking */
+            width: 100%;
+            padding-top: 1rem;
+        }
+        
+        .suggestion-section {
+            padding: 0 1.5rem 1rem;
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: -10px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .suggestion-chips::-webkit-scrollbar { display: none; }
+        
+        .chip {
+            background-color: var(--surface-1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0.8rem 1.1rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.1rem;
+        }
+
+        .chip:hover { background-color: var(--surface-2); }
+        
+        .chip-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        .chip-subtitle {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .chat-section {
+            padding: 0 1.5rem 2rem;
+            /* Adds padding for iPhone home bar */
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); 
+        }
+
+        .input-container {
+            position: relative;
+            background-color: var(--surface-1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .input-container:focus-within {
+            background-color: var(--surface-2);
+            box-shadow: 0 0 0 1.5px var(--accent);
+            border-color: transparent;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            line-height: 1.5;
+            padding: 0.75rem 0;
+            resize: none;
+            max-height: 150px;
+        }
+
+        .chat-input::placeholder { color: var(--text-secondary); }
+
+        .input-actions { display: flex; align-items: center; gap: 0.25rem; }
+        
+        .action-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .action-btn:not(:disabled):hover {
+            background-color: var(--surface-2);
+            color: var(--text-primary);
+        }
+
+        .action-btn svg { width: 22px; height: 22px; }
+        
+        .send-btn { background-color: var(--accent); color: white; }
+        .send-btn:hover { background-color: #3b78d8; }
+        .send-btn:disabled {
+            background-color: var(--surface-2);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .voice-btn.active {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        
+        .file-input { display: none; }
+        
+        @media (max-width: 768px) {
+            .welcome-title { font-size: 2.25rem; }
+            .suggestion-section, .chat-section, .header {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .chat-section {
+                padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-container">
+                    <img src="./bluarmor logo.png" alt="BluArmor Logo" class="logo-img" />
+                </div>
+                <h1 class="title">BluArmor Assistant</h1>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" title="Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <div class="main-logo">
+                     <img src="./bluarmor logo.png" alt="BluArmor Logo" class="logo-img" />
+                </div>
+                <h2 class="welcome-title">How can I help you today?</h2>
+            </div>
+        </main>
+        
+        <div class="bottom-content-wrapper">
+            <div class="suggestion-section">
+                <div class="suggestion-chips">
+                    <button class="chip">
+                        <span class="chip-title">Connection Issues</span>
+                        <span class="chip-subtitle">I am unable to connect my device</span>
+                    </button>
+                    <button class="chip">
+                        <span class="chip-title">Battery Problems</span>
+                        <span class="chip-subtitle">My battery is running low</span>
+                    </button>
+                    <button class="chip">
+                         <span class="chip-title">Firmware Update</span>
+                         <span class="chip-subtitle">How do I update the firmware?</span>
+                    </button>
+                    <button class="chip">
+                        <span class="chip-title">LED Status</span>
+                        <span class="chip-subtitle">What do the LED light colors mean?</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-section">
+                <div class="input-container">
+                    <textarea class="chat-input" placeholder="Ask anything..." id="chatInput" rows="1"></textarea>
+                    <div class="input-actions">
+                        <button class="action-btn" title="Attach files" onclick="document.getElementById('fileInput').click()">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.122 2.122l7.81-7.81" /></svg>
+                        </button>
+                        <button class="action-btn voice-btn" title="Voice input" id="voiceBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 1 1-14 0v-2"></path></svg>
+                        </button>
+                        <button class="action-btn send-btn" title="Send message" id="sendBtn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <input type="file" id="fileInput" class="file-input" multiple>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const suggestionChips = document.querySelectorAll('.chip');
+
+        // --- Auto-resize textarea & Enable/Disable Send Button ---
+        chatInput.addEventListener('input', () => {
+            sendBtn.disabled = chatInput.value.trim() === '';
+            chatInput.style.height = 'auto';
+            chatInput.style.height = `${chatInput.scrollHeight}px`;
+        });
+
+        // --- Send Message ---
+        const sendMessage = () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                console.log('Sending message:', message);
+                chatInput.value = '';
+                chatInput.dispatchEvent(new Event('input')); // Reset height and button state
+            }
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // --- Suggestion Chips ---
+        suggestionChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const query = chip.querySelector('.chip-subtitle').textContent;
+                chatInput.value = query;
+                sendMessage();
+            });
+        });
+
+        // --- Voice Recognition ---
+        let isRecording = false;
+        let recognition = null;
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                chatInput.value = event.results[0][0].transcript;
+                chatInput.dispatchEvent(new Event('input'));
+            };
+            
+            recognition.onerror = (event) => console.error('Speech recognition error:', event.error);
+            recognition.onend = () => {
+                isRecording = false;
+                voiceBtn.classList.remove('active');
+            };
+
+            voiceBtn.addEventListener('click', () => {
+                if (!isRecording) {
+                    try {
+                        recognition.start();
+                        isRecording = true;
+                        voiceBtn.classList.add('active');
+                    } catch(e) { console.error("Could not start recognition:", e); }
+                } else {
+                    recognition.stop();
+                }
+            });
+        } else {
+            voiceBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
